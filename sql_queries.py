@@ -96,16 +96,31 @@ class SqlRunner:
 
     @save_data
     def question4(self):
-        result = self.db.execute('''select Country, sum(num)as num_of_sales from(
-                                        select Country, count(invoice_items.InvoiceLineId) as num from customers
-                                        join invoices on customers.CustomerId=invoices.CustomerId 
-                                        join invoice_items on invoices.InvoiceId=invoice_items.InvoiceId
-                                        join tracks on tracks.TrackId=invoice_items.TrackId
-                                        join albums on albums.AlbumId=tracks.AlbumId
-                                        group by albums.AlbumId)
-                                    group by Country''')
+        result = self.db.execute('''with songs as
+                                    (
+                                    select 
+                                        AlbumId album_key,
+                                        count(*) number_of_songs
+                                    from 
+                                        tracks
+                                    group by album_key
+                                    ),
+                                    tab as (
+                                    select InvoiceId, CustomerId, AlbumId, count(TrackId) as number from (
+                                    select i.InvoiceId, i.CustomerId, il.InvoiceLineId, il.TrackId ,
+                                     t.AlbumId from invoices i
+                                    inner join invoice_items il ON i.InvoiceId = il.InvoiceId
+                                    inner join tracks t on t.TrackId = il.TrackId
+                                    group by il.InvoiceLineId)	
+                                    group by InvoiceId, AlbumId
+                                    )
+                                    select customers.Country, count(tab.number) as num from tab
+                                        inner join songs on  songs.album_key = tab.AlbumId
+                                        inner join customers on customers.CustomerId = tab.CustomerId
+                                        where tab.number = number_of_songs
+                                        group by customers.Country order by InvoiceId''')
         for i in result:
-            yield {'country': i.Country, 'num_of_sales': i.num_of_sales}
+            yield {'country': i.Country, 'num': i.num}
 
     @save_data
     def question5(self):
@@ -148,3 +163,7 @@ class SqlRunner:
                                     Where UPPER(Name) like "%BLACK%"''')
         for i in result:
             yield {'black_in_song_name': i.number}
+
+
+if __name__ == '__main__':
+    SqlRunner("chinook.db", 'csv').question4()
