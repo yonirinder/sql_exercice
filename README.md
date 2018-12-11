@@ -1,5 +1,7 @@
 # sql_exercice
 
+Preconditions:  RabbitMQ server Installed and running ,  Python 3 Installed
+
 Install reqierments: 
 pip install -r requirements.txt
 
