@@ -11,4 +11,4 @@ python cnsumer.py
 Send messages to Queue: 
 python send.py
 
-You can edit 'tipe' and 'path' params inside send.py file
+You can edit 'type' and 'path' params inside send.py file
