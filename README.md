@@ -1,4 +1,4 @@
-# sql_exercice
+# sql_exercise
 
 Preconditions:  RabbitMQ server Installed and running ,  Python 3 Installed
 
